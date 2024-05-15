@@ -16,3 +16,16 @@ export const CONFIG = {
   ],
   palette: ["#E2DB55", "#0BCBAB", "#008A84", "#004699", "#222222"],
 };
+
+// export const TOOLS = [
+//   {
+//     type: "sewing",
+//     params: {
+//       scale: 0.03,
+//       radius: 56,
+//     },
+//   },
+//   {
+//     type: "decals",
+//   },
+// ];
