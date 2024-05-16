@@ -21,51 +21,43 @@ const about = {
   },
 };
 
-const ui = {
-  container: document.getElementById("controls"),
-  tools: document.getElementsByClassName("tool"),
-  selectToolByIndex: (index) => {
-    window.nengaState.currentTool = index;
-
-    for (let tool of ui.tools) {
-      tool.classList.remove("active");
-    }
-    // ui.tools.foreach((element) => {
-    //   element.classList.remove("active");
-    // });
-
-    ui.tools[index].classList.add("active");
+window.ui = {
+  el: undefined,
+  container: undefined,
+  tools: { els: undefined },
+  init: () => {
+    ui.el = document.getElementById("ui");
+    ui.container = document.getElementById("controls");
+    ui.tools.els = document.getElementsByClassName("tool");
+    ui.addEventListeners();
   },
   addEventListeners: function () {
-    for (let i = 0; i < ui.tools.length; i++) {
-      ui.tools[i].addEventListener("click", () => {
+    for (let i = 0; i < ui.tools.els.length; i++) {
+      ui.tools.els[i].addEventListener("click", () => {
         ui.selectToolByIndex(i);
       });
     }
-
-    // document.getElementById("tool-0").addEventListener("click", () => {
-    //   console.debug("tool-0:click");
-    // });
-    // document.getElementById("tool-1").addEventListener("click", () => {
-    //   console.debug("tool-1:click");
-    //   window.nengaState.currentTool = 1;
-    // });
-    // document.getElementById("tool-2").addEventListener("click", () => {
-    //   console.debug("tool-2:click");
-    //   window.nengaState.currentTool = 2;
-    // });
-    // document.getElementById("tool-3").addEventListener("click", () => {
-    //   console.debug("tool-3:click");
-    //   window.nengaState.currentTool = 3;
-    // });
-    // document.getElementById("tool-4").addEventListener("click", () => {
-    //   console.debug("tool-4:click");
-    //   window.nengaState.currentTool = 4;
-    // });
-    // document.getElementById("tool-5").addEventListener("click", () => {
-    //   console.debug("tool-5:click");
-    //   window.nengaState.currentTool = 5;
-    // });
+    document.getElementById("tool-save").addEventListener("click", () => {
+      nengaExperience.saveAsImage();
+    });
+    document.getElementById("tool-clear").addEventListener("click", () => {
+      nengaExperience.clear();
+    });
+  },
+  selectToolByIndex: (index) => {
+    window.nengaState.currentTool = index;
+    // remove active class
+    for (let tool of ui.tools.els) {
+      tool.classList.remove("active");
+    }
+    // add active to index
+    ui.tools.els[index].classList.add("active");
+  },
+  hide: () => {
+    ui.el.classList.add("hidden");
+  },
+  show: () => {
+    ui.el.classList.remove("hidden");
   },
 };
 
@@ -76,13 +68,14 @@ const ui = {
 
 window.addEventListener("load", async () => {
   console.debug("window:load");
-  about.addEventListeners();
-  ui.addEventListeners();
 
   // CREAFT THE EXPERIENCE
   const renderTarget = document.getElementById("threejs");
   window.nengaExperience = await threeInit(renderTarget);
   nengaExperience.start();
+
+  ui.init();
+  about.addEventListeners();
 
   window.addEventListener("resize", (event) => {
     nengaExperience.onResize();

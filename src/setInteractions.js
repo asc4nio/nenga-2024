@@ -58,7 +58,7 @@ export default function setInteractions(
     const scale = TOOLS[nengaState.currentTool].params.scale;
     const size = new THREE.Vector3(scale, scale, 1);
     const material = world.materials.stitchesMaterials[toolIndex].clone();
-    material.color = new THREE.Color(CONFIG.palette[nengaState.currentColor]);
+    material.color = new THREE.Color(TOOLS[nengaState.currentTool].color);
 
     const mesh = new THREE.Mesh(
       new DecalGeometry(target, position, orientation, size),
@@ -195,6 +195,8 @@ export default function setInteractions(
           // update pointer drag position
           pointerState.dragStartPos.x = event.pageX;
           pointerState.dragStartPos.y = event.pageY;
+
+          ui.hide();
         }
       }
     });
@@ -206,9 +208,14 @@ export default function setInteractions(
       if (TOOLS[nengaState.currentTool].type == "sewing") {
         pointerState.lastDecalPos = undefined;
         pointerState.isShooting = false;
+
+        ui.show();
       }
     });
   }
 
-  return {};
+  return {
+    stitches,
+    decals,
+  };
 }

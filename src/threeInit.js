@@ -42,7 +42,13 @@ export default async function threeInit(renderTarget) {
   scene.add(denimPlane);
 
   // THAN SET THE INTERACTIONS
-  setInteractions(denimPlane, scene, renderTarget, camera, world);
+  const interactivity = setInteractions(
+    denimPlane,
+    scene,
+    renderTarget,
+    camera,
+    world
+  );
 
   // IF DEBUG
   if (nengaState.debug) {
@@ -96,9 +102,12 @@ export default async function threeInit(renderTarget) {
     let renderer = new THREE.WebGLRenderer({
       // antialias: true,
       preserveDrawingBuffer: true,
+      alpha: true,
     });
     renderer.setSize(renderTarget.offsetWidth, renderTarget.offsetHeight);
-    renderer.setClearColor(new THREE.Color(0xffffff));
+    // renderer.setClearColor(new THREE.Color(0xffffff));
+    renderer.setClearColor(0x000000, 0); // the default
+
     renderTarget.appendChild(renderer.domElement);
 
     return renderer;
@@ -112,13 +121,16 @@ export default async function threeInit(renderTarget) {
       1000
     );
     camera.position.z = 5;
-    let camDist = camera.position.z - 1;
+    let camDist = camera.position.z - CONFIG.cameraDistance;
 
     let heightToFit = 1; // desired height to fit
     camera.fov = 2 * Math.atan(heightToFit / (2 * camDist)) * (180 / Math.PI);
     camera.updateProjectionMatrix();
 
-    if (nengaState.orbitControls) new OrbitControls(camera, renderTarget);
+    if (nengaState.orbitControls) {
+      let controls = new OrbitControls(camera, renderTarget);
+      controls.enableRotate = false;
+    }
 
     return camera;
   }
@@ -227,6 +239,17 @@ export default async function threeInit(renderTarget) {
       link.click();
     }, "image/png");
   }
+  function clear() {
+    console.debug("clearDecals()");
+    interactivity.decals.forEach(function (d) {
+      scene.remove(d);
+    });
+    interactivity.decals.length = 0;
+    interactivity.stitches.forEach(function (d) {
+      scene.remove(d);
+    });
+    interactivity.stitches.length = 0;
+  }
 
   return {
     start,
@@ -234,5 +257,6 @@ export default async function threeInit(renderTarget) {
     renderer,
     saveAsImage,
     onResize,
+    clear,
   };
 }

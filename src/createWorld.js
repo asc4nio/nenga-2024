@@ -53,10 +53,10 @@ export default function createWorld(resources, scene, renderTarget) {
     const denimMaterial = new THREE.MeshStandardMaterial({
       map: resources.denim.diffuse,
       normalMap: resources.denim.normal,
-      roughnessMap: resources.denim.roughness,
-      bumpMap: resources.denim.bump,
       normalScale: new THREE.Vector2(2, 2),
-      transparent: true,
+      // bumpMap: resources.denim.bump,
+      // roughnessMap: resources.denim.roughness,
+      // transparent: true,
       // depthTest: true,
       // depthWrite: false,
     });

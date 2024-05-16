@@ -10,30 +10,94 @@
     <div id="app">
       <div id="threejs"></div>
       <div id="ui">
-        <button id="about-trigger">about</button>
-        <div id="controls">
-          <button class="tool active" id="tool-0">tool 0</button>
-          <button class="tool" id="tool-1">tool 1</button>
-          <button class="tool" id="tool-2">tool 2</button>
-          <button class="tool" id="tool-3">tool 3</button>
-          <button class="tool" id="tool-4">tool 4</button>
-          <button class="tool" id="tool-5">tool 5</button>
-          <button id="tool-save">save</button>
-          <button id="tool-clear">clear</button>
+        <div id="tools">
+          <button class="tool active" id="tool-0">
+            <img class="tool-img" src="/ui/tool-0.png" alt="" />
+          </button>
+          <button class="tool" id="tool-1">
+            <img class="tool-img" src="/ui/tool-1.png" alt="" />
+          </button>
+          <button class="tool" id="tool-2">
+            <img class="tool-img" src="/ui/tool-2.png" alt="" />
+          </button>
+          <button class="tool" id="tool-3">
+            <img class="tool-img" src="/tex/decal-01.png" alt="" />
+          </button>
+          <button class="tool" id="tool-4">
+            <img class="tool-img" src="/tex/decal-02.png" alt="" />
+          </button>
+          <button class="tool" id="tool-5">
+            <img class="tool-img" src="/tex/decal-04.png" alt="" />
+          </button>
         </div>
+        <nav>
+          <button id="tool-save">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="currentColor"
+            >
+              <path
+                d="M200-680v-120q0-33 23.5-56.5T280-880h120v80H280v120h-80Zm80 600q-33 0-56.5-23.5T200-160v-120h80v120h120v80H280Zm400-600v-120H560v-80h120q33 0 56.5 23.5T760-800v120h-80ZM560-80v-80h120v-120h80v120q0 33-23.5 56.5T680-80H560Z"
+              />
+            </svg>
+          </button>
+          <button id="tool-clear">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="currentColor"
+            >
+              <path
+                d="M440-122q-121-15-200.5-105.5T160-440q0-66 26-126.5T260-672l57 57q-38 34-57.5 79T240-440q0 88 56 155.5T440-202v80Zm80 0v-80q87-16 143.5-83T720-440q0-100-70-170t-170-70h-3l44 44-56 56-140-140 140-140 56 56-44 44h3q134 0 227 93t93 227q0 121-79.5 211.5T520-122Z"
+              />
+            </svg>
+          </button>
+          <button id="about-trigger">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="currentColor"
+            >
+              <path
+                d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"
+              />
+            </svg>
+          </button>
+        </nav>
       </div>
 
       <dialog id="about" aria-labelledby="about-trigger">
-        <form method="dialog">
-          <button type="submit" autofocus>close</button>
-          <img src="/nenga-logo.svg" alt="nenga logo" />
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo omnis
-            id mollitia numquam saepe similique perspiciatis consectetur nulla,
-            blanditiis corrupti tempora exercitationem, suscipit nihil!
-          </p>
-          <a href="#"> instagram </a>
-        </form>
+        <div id="about-container">
+          <form method="dialog">
+            <button type="submit" autofocus>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="currentColor"
+              >
+                <path
+                  d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                />
+              </svg>
+            </button>
+            <img src="/nenga-logo.svg" alt="nenga logo" />
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo omnis
+              id mollitia numquam saepe similique perspiciatis consectetur
+              nulla, blanditiis corrupti tempora exercitationem, suscipit nihil!
+            </p>
+            <a href="#"> instagram </a>
+          </form>
+        </div>
       </dialog>
     </div>
     <script type="module" src="/main.js"></script>
