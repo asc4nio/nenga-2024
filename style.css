@@ -1,24 +1,22 @@
-#app {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-
-#threejs {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-
-canvas {
-  touch-action: none;
+@font-face {
+  font-family: "absans";
+  src: url("/fonts/Absans-Regular.woff2") format("woff2");
 }
 
 :root {
+  font-family: "absans";
+  /* font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; */
+  line-height: 1.25;
+  /* font-weight: 400; */
+  font-size: calc(1rem + 0.25vw);
+
+  --col-white: #dfe8e8;
+  --col-yellow: #e2db55;
+  --col-green: #0bcbab;
+  --col-cyan: #008a84;
+  --col-blue: #004699;
+  --col-black: #222222;
+
   --tp-base-background-color: hsla(0, 0%, 10%, 0.8);
   --tp-base-shadow-color: hsla(0, 0%, 0%, 0.2);
   --tp-button-background-color: hsla(0, 0%, 80%, 1);
@@ -40,6 +38,74 @@ canvas {
   --tp-label-foreground-color: hsla(0, 0%, 100%, 0.5);
   --tp-monitor-background-color: hsla(0, 0%, 0%, 0.3);
   --tp-monitor-foreground-color: hsla(0, 0%, 100%, 0.3);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+
+  background-color: var(--col-white);
+  color: var(--col-black);
+}
+
+#app {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+#threejs {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+canvas {
+  touch-action: none;
+}
+
+#ui {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+
+  padding: 1em;
+}
+
+button {
+  pointer-events: auto;
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 1.25em;
+
+  background: transparent;
+  border: none;
+}
+
+p {
+  font-size: 1.25em;
+}
+
+dialog {
+  margin: 2rem;
+}
+
+dialog::backdrop {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.tool {
+}
+.tool.active {
+  text-decoration: underline;
 }
 
 /* :root {

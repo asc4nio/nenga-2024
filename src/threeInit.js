@@ -1,17 +1,22 @@
-import { CONFIG } from "/src/config.js";
+import { CONFIG, TOOLS } from "/src/config.js";
 
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 import { Pane } from "tweakpane";
+import Stats from "three/addons/libs/stats.module.js";
 
 import loadResources from "/src/loadResources.js";
 import createWorld from "/src/createWorld.js";
 import setInteractions from "/src/setInteractions.js";
 
+import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
+
 export default async function threeInit(renderTarget) {
   // CREATE STATE INSTANCE
   window.nengaState = {
+    debug: window.location.hash.includes("#debug"),
+    orbitControls: false,
     currentTool: 0,
     currentColor: 0,
   };
@@ -19,11 +24,17 @@ export default async function threeInit(renderTarget) {
   const renderer = createRenderer();
   const scene = new THREE.Scene();
   const camera = createCamera();
+  let stats;
+
   // LOAD RESOURCES
-  const loader = createLoader();
-  const resources = await loadResources(loader).catch((err) => {
+  const loaders = createLoaders();
+  const resources = await loadResources(
+    loaders.textureLoader,
+    loaders.svgLoader
+  ).catch((err) => {
     console.log(err);
   });
+
   // THAN CREATE THE WORLD
   const world = createWorld(resources, scene, renderTarget);
 
@@ -31,12 +42,18 @@ export default async function threeInit(renderTarget) {
   scene.add(denimPlane);
 
   // THAN SET THE INTERACTIONS
-  setInteractions(denimPlane, scene, renderTarget, camera, world.materials);
+  setInteractions(denimPlane, scene, renderTarget, camera, world);
 
-  if (window.location.hash === "#debug") debug(world);
+  // IF DEBUG
+  if (nengaState.debug) {
+    stats = new Stats();
+    document.body.appendChild(stats.dom);
+
+    debug(world);
+  }
 
   // CREATE LOADER
-  function createLoader() {
+  function createLoaders() {
     const manager = new THREE.LoadingManager();
     manager.onStart = function (url, itemsLoaded, itemsTotal) {
       console.log(
@@ -69,9 +86,10 @@ export default async function threeInit(renderTarget) {
     manager.onError = function (url) {
       console.log("There was an error loading " + url);
     };
-    const loader = new THREE.TextureLoader(manager);
+    const textureLoader = new THREE.TextureLoader(manager);
+    const svgLoader = new SVGLoader(manager);
 
-    return loader;
+    return { textureLoader, svgLoader };
   }
   // CREATE RENDERER
   function createRenderer() {
@@ -100,35 +118,56 @@ export default async function threeInit(renderTarget) {
     camera.fov = 2 * Math.atan(heightToFit / (2 * camDist)) * (180 / Math.PI);
     camera.updateProjectionMatrix();
 
-    // let controls = new OrbitControls(camera, renderTarget);
+    if (nengaState.orbitControls) new OrbitControls(camera, renderTarget);
 
     return camera;
   }
   // SET DEBUG ENVIRONMENT
   function debug() {
-    const directionalLightHelper = new THREE.DirectionalLightHelper(
-      world.lights.directionalLight,
-      world.lights.directionalLight.intensity * 0.1
+    // debug lights
+    scene.add(
+      new THREE.DirectionalLightHelper(
+        world.lights.directionalLight,
+        world.lights.directionalLight.intensity * 0.1,
+        0x000000
+      )
     );
-    scene.add(directionalLightHelper);
+    // scene.add(
+    //   new THREE.PointLightHelper(
+    //     world.lights.pointLight,
+    //     world.lights.pointLight.intensity * 0.1
+    //   )
+    // );
 
+    // tweakpane
     const pane = new Pane({
       container: document.getElementById("someContainer"),
     });
     pane.addBinding(nengaState, "currentTool", {
       step: 1,
       min: 0,
-      max: 1,
+      max: TOOLS.length - 1,
     });
     pane.addBinding(nengaState, "currentColor", {
       step: 1,
       min: 0,
       max: CONFIG.palette.length - 1,
     });
+    // pane.addBinding(pointerState, "mouse", {
+    //   readonly: true,
+    //   multiline: true,
+    //   rows: 2,
+    // });
+    pane.addBinding(pointerState.mouse, "x", {
+      readonly: true,
+    });
+    pane.addBinding(pointerState.mouse, "y", {
+      readonly: true,
+    });
 
-    // for (let i = 0; i < CONFIG.palette.length; i++) {
-    //   pane.addBinding(CONFIG.palette, i.toString());
-    // }
+    for (let i = 0; i < CONFIG.palette.length; i++) {
+      pane.addBinding(CONFIG.palette, i.toString());
+    }
 
     // const paneCurrentTool = pane.addBinding(nengaState, "currentTool", {
     //   step: 1,
@@ -137,11 +176,23 @@ export default async function threeInit(renderTarget) {
     //   console.log(`change: ${ev.value}`);
     // });
   }
-  /**
-   * METHODS
-   */
+
   function update() {
     renderer.render(scene, camera);
+    if (window.pointerState) {
+      // world.lights.directionalLight.position.set(
+      //   pointerState.mouse.x,
+      //   pointerState.mouse.y,
+      //   world.lights.directionalLight.position.z
+      // );
+      // world.lights.pointLight.lookAt(new THREE.Vector3(0, 0, 0));
+      // world.lights.pointLight.position.set(
+      //   pointerState.mouse.x,
+      //   pointerState.mouse.y,
+      //   world.lights.pointLight.position.z
+      // );
+    }
+    if (nengaState.debug) stats.update();
   }
   function start() {
     renderer.setAnimationLoop(update);

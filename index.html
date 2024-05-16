@@ -9,6 +9,32 @@
   <body>
     <div id="app">
       <div id="threejs"></div>
+      <div id="ui">
+        <button id="about-trigger">about</button>
+        <div id="controls">
+          <button class="tool active" id="tool-0">tool 0</button>
+          <button class="tool" id="tool-1">tool 1</button>
+          <button class="tool" id="tool-2">tool 2</button>
+          <button class="tool" id="tool-3">tool 3</button>
+          <button class="tool" id="tool-4">tool 4</button>
+          <button class="tool" id="tool-5">tool 5</button>
+          <button id="tool-save">save</button>
+          <button id="tool-clear">clear</button>
+        </div>
+      </div>
+
+      <dialog id="about" aria-labelledby="about-trigger">
+        <form method="dialog">
+          <button type="submit" autofocus>close</button>
+          <img src="/nenga-logo.svg" alt="nenga logo" />
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo omnis
+            id mollitia numquam saepe similique perspiciatis consectetur nulla,
+            blanditiis corrupti tempora exercitationem, suscipit nihil!
+          </p>
+          <a href="#"> instagram </a>
+        </form>
+      </dialog>
     </div>
     <script type="module" src="/main.js"></script>
   </body>

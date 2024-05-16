@@ -1,26 +1,40 @@
-export default async function loadResources(loader) {
+import { TOOLS } from "./config.js";
+
+export default async function loadResources(textureLoader, svgLoader) {
   // DENIM TEXTURES
   let denim = {
-    diffuse: await loader.loadAsync("/tex/denim02-diffuse.jpg"),
-    normal: await loader.loadAsync("/tex/denim02-normal.jpg"),
-    roughness: await loader.loadAsync("/tex/denim02-roughness.jpg"),
-    bump: await loader.loadAsync("/tex/denim02-bump.jpg"),
+    diffuse: await textureLoader.loadAsync("/tex/denim02-diffuse.jpg"),
+    normal: await textureLoader.loadAsync("/tex/denim02-normal.jpg"),
+    roughness: await textureLoader.loadAsync("/tex/denim02-roughness.jpg"),
+    bump: await textureLoader.loadAsync("/tex/denim02-bump.jpg"),
   };
 
   // STITCHES TEXTURES
-  let stitches = [
-    {
-      diffuse: await loader.loadAsync("/tex/brush01-diffuse.png"),
-      normal: await loader.loadAsync("/tex/brush01-normal.jpg"),
-    },
-    {
-      diffuse: await loader.loadAsync("/tex/brush02-diffuse.png"),
-      normal: await loader.loadAsync("/tex/brush02-normal.jpg"),
-    },
-  ];
+  let stitches = [];
+  let decals = [];
+  for (let tool of TOOLS) {
+    if (tool.type == "sewing") {
+      let diffuse = await textureLoader.loadAsync(tool.textures.diffuse);
+      let normal = await textureLoader.loadAsync(tool.textures.normal);
+      stitches.push({
+        diffuse: diffuse,
+        normal: normal,
+      });
+    } else if (tool.type == "decal") {
+      let diffuse = await textureLoader.loadAsync(tool.textures.diffuse);
+      decals.push({
+        diffuse: diffuse,
+      });
+    }
+  }
+
+  // SVG
+  let sun = await svgLoader.loadAsync("/tex/sun.svg");
 
   return {
     denim,
     stitches,
+    decals,
+    sun,
   };
 }

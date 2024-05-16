@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CONFIG } from "/src/config.js";
+import { CONFIG, TOOLS } from "/src/config.js";
 import { DecalGeometry } from "three/addons/geometries/DecalGeometry.js";
 
 export default function setInteractions(
@@ -7,61 +7,57 @@ export default function setInteractions(
   scene,
   renderTarget,
   camera,
-  materials
+  world
 ) {
   window.pointerState = {
     isPointerDown: false,
     dragStartPos: new THREE.Vector2(),
     lastDecalPos: undefined,
     isShooting: false,
+    mouse: new THREE.Vector2(),
   };
   const intersectionState = {
     intersects: false,
     point: new THREE.Vector3(),
   };
 
-  const intersects = [];
+  // const intersects = [];
   var stitches = [];
+  var decals = [];
 
   const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
+  // const mouse = new THREE.Vector2();
 
   addListeners(renderTarget);
+  sewAnimation(world.sun.points);
 
   // RAYCASTER
-  function checkRaycasterIntersection(x, y, mesh) {
+  function checkRaycasterIntersection(mesh, event) {
     // console.debug("checkRaycasterIntersection", x, y);
-
     if (mesh === undefined) return;
 
-    mouse.x = (x / renderTarget.offsetWidth) * 2 - 1;
-    mouse.y = -(y / renderTarget.offsetHeight) * 2 + 1;
+    // update normalized pointer position
+    pointerState.mouse.x = (event.pageX / renderTarget.offsetWidth) * 2 - 1;
+    pointerState.mouse.y = -(event.pageY / renderTarget.offsetHeight) * 2 + 1;
 
-    raycaster.setFromCamera(mouse, camera);
-    raycaster.intersectObject(mesh, false, intersects);
+    raycaster.setFromCamera(pointerState.mouse, camera);
+    const intersects = raycaster.intersectObject(mesh, false);
 
     if (intersects.length > 0) {
       const p = intersects[0].point;
-      intersectionState.point.copy(p);
-
       if (pointerState.lastDecalPos === undefined) {
         pointerState.lastDecalPos = new THREE.Vector3();
-        pointerState.lastDecalPos.copy(intersectionState.point);
+        pointerState.lastDecalPos.copy(p);
       }
-      intersectionState.intersects = true;
-
-      intersects.length = 0;
-    } else {
-      // console.debug(intersects)
-      intersectionState.intersects = false;
-    }
+      return p;
+    } else return null;
   }
+
   // STITCHES
-  function createStitch(target, orientation, position) {
-    const scale = CONFIG.stitches[nengaState.currentTool].scale;
+  function createStitch(target, orientation, position, toolIndex) {
+    const scale = TOOLS[nengaState.currentTool].params.scale;
     const size = new THREE.Vector3(scale, scale, 1);
-    const material =
-      materials.stitchesMaterials[nengaState.currentTool].clone();
+    const material = world.materials.stitchesMaterials[toolIndex].clone();
     material.color = new THREE.Color(CONFIG.palette[nengaState.currentColor]);
 
     const mesh = new THREE.Mesh(
@@ -70,30 +66,38 @@ export default function setInteractions(
     );
     return mesh;
   }
-  function sew(scene, target, intersectionState) {
-    console.debug("sew()", intersectionState.point);
+  function sew(target, intersection) {
+    console.debug("sew()", intersection);
 
     //set direction
     let direction = new THREE.Vector3();
-    direction.subVectors(pointerState.lastDecalPos, intersectionState.point);
+    direction.subVectors(pointerState.lastDecalPos, intersection);
 
     //set orientation
     const orientation = new THREE.Euler();
     let dir = (Math.atan2(direction.x, direction.y) + Math.PI / 2) * -1;
-    orientation.z = dir;
+    orientation.z = dir * 1;
+
     // set position
     const position = new THREE.Vector3();
-    position.copy(intersectionState.point);
+    position.copy(intersection);
 
-    let mesh = createStitch(target, orientation, position);
+    // sew
+    let mesh = createStitch(
+      target,
+      orientation,
+      position,
+      nengaState.currentTool
+    );
     mesh.position.z += 0.002;
     stitches.push(mesh);
     scene.add(mesh);
 
+    // store last stitch position
     window.pointerState.lastDecalPos = position;
   }
-  function canSew() {
-    let currentToolRadius = CONFIG.stitches[nengaState.currentTool].radius;
+  function canSew(event) {
+    let currentToolRadius = TOOLS[nengaState.currentTool].params.radius;
     let currentShootRadius = renderTarget.offsetHeight / currentToolRadius;
 
     let diffX = Math.abs(event.pageX - pointerState.dragStartPos.x);
@@ -101,43 +105,110 @@ export default function setInteractions(
 
     return diffX > currentShootRadius || diffY > currentShootRadius;
   }
+  // DECALS
+  function createDecal(target, orientation, position) {
+    const scale = TOOLS[nengaState.currentTool].params.scale;
+    const size = new THREE.Vector3(scale, scale, 1);
+    const material =
+      world.materials.decalsMaterials[nengaState.currentTool - 3].clone();
+
+    const mesh = new THREE.Mesh(
+      new DecalGeometry(target, position, orientation, size),
+      material
+    );
+    mesh.renderOrder = 1;
+    return mesh;
+  }
+  function placeDecal(scene, target, intersection) {
+    console.debug("placeDecal()", intersection);
+
+    const orientation = new THREE.Euler();
+
+    // set position
+    const position = new THREE.Vector3();
+    position.copy(intersection);
+    // position.x = intersection.x;
+    // position.y = intersection.y;
+    // position.z = 0;
+    // position.z = -0.01;
+
+    // sew
+    let mesh = createDecal(target, orientation, position);
+    mesh.position.z += 0.002;
+    decals.push(mesh);
+    scene.add(mesh);
+  }
+
+  //ANIMATION
+  async function sewAnimation(points) {
+    let animatedStitches = new THREE.Group();
+    scene.add(animatedStitches);
+
+    // for (let point of points) {
+    for (let i = 0; i < points.length; i++) {
+      const orientation = new THREE.Euler();
+      orientation.set(0, 0, points[i].rotation + Math.PI * 0);
+
+      const position = new THREE.Vector3();
+      position.x = points[i].position.x;
+      position.y = points[i].position.y;
+
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      await sleep(40);
+
+      // sew
+      let mesh = createStitch(target, orientation, position, 2);
+      mesh.position.z += 0.002;
+      animatedStitches.add(mesh);
+    }
+  }
 
   // EVENT LISTENERS
   function addListeners(renderTarget) {
     renderTarget.addEventListener("pointerdown", function (event) {
       // console.debug("pointerdown");
-
       pointerState.isPointerDown = true;
-      pointerState.dragStartPos.x = event.pageX;
-      pointerState.dragStartPos.y = event.pageY;
+
+      if (TOOLS[nengaState.currentTool].type == "decal") {
+        let intersection = checkRaycasterIntersection(target, event);
+        if (intersection == null) return;
+        placeDecal(scene, target, intersection);
+      } else if (TOOLS[nengaState.currentTool].type == "sewing") {
+        pointerState.dragStartPos.x = event.pageX;
+        pointerState.dragStartPos.y = event.pageY;
+      }
     });
 
     renderTarget.addEventListener("pointermove", (event) => {
       // console.debug("pointermove");
 
+      // proceed if pointer has clicked
       if (pointerState.isPointerDown && event.isPrimary) {
-        checkRaycasterIntersection(event.clientX, event.clientY, target);
-        if (canSew() == false) return;
-        if (intersectionState.intersects) {
+        let intersection = checkRaycasterIntersection(target, event);
+        if (intersection == null) return;
+
+        // check tool type
+        if (TOOLS[nengaState.currentTool].type == "sewing" && canSew(event)) {
           pointerState.isShooting = true;
-          sew(scene, target, intersectionState);
+          sew(target, intersection);
+
+          // update pointer drag position
+          pointerState.dragStartPos.x = event.pageX;
+          pointerState.dragStartPos.y = event.pageY;
         }
-        pointerState.dragStartPos.x = event.pageX;
-        pointerState.dragStartPos.y = event.pageY;
       }
     });
 
     renderTarget.addEventListener("pointerup", function (event) {
       // console.debug("pointerup");
       pointerState.isPointerDown = false;
-      pointerState.lastDecalPos = undefined;
-      pointerState.isShooting = false;
+
+      if (TOOLS[nengaState.currentTool].type == "sewing") {
+        pointerState.lastDecalPos = undefined;
+        pointerState.isShooting = false;
+      }
     });
   }
 
-  return {
-    // stitches,
-    // createStitch,
-    // addListeners,
-  };
+  return {};
 }
