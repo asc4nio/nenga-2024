@@ -95,8 +95,9 @@ export default async function setInteractions(
     stitches.push(mesh);
     scene.add(mesh);
 
-    audio.sound.stop();
-    audio.sound.play();
+    audio.sound.isPlaying ? null : audio.sound.play();
+    // audio.sound.stop();
+    // audio.sound.play();
 
     // store last stitch position
     window.pointerState.lastDecalPos = position;
