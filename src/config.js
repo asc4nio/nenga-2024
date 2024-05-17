@@ -2,7 +2,10 @@ export const CONFIG = {
   cameraDistance: 0,
   denimScale: 2.5,
   sunScale: 0.15,
-  sunDivisions: 72,
+  sunDivisions: 42,
+  sunStepEvery: 40, //ms
+  lightIntensity: 4,
+  lightPosition: [-1, 0.5, 1],
   palette: ["#E2DB55", "#0BCBAB", "#008A84", "#004699", "#222222"],
 };
 
@@ -46,7 +49,7 @@ export const TOOLS = [
   {
     type: "decal",
     textures: {
-      diffuse: "/tex/decal-01.png",
+      diffuse: "/tex/decal-01-s.png",
     },
     params: {
       scale: 0.07 * 0.8,
@@ -55,19 +58,31 @@ export const TOOLS = [
   {
     type: "decal",
     textures: {
-      diffuse: "/tex/decal-02.png",
+      diffuse: "/tex/decal-02-s.png",
     },
     params: {
-      scale: 0.09 * 0.8,
+      scale: 0.07 * 0.8,
     },
   },
   {
     type: "decal",
     textures: {
-      diffuse: "/tex/decal-04.png",
+      diffuse: "/tex/decal-04-s.png",
     },
     params: {
       scale: 0.06 * 1.2,
+    },
+  },
+  {
+    type: "sewing",
+    color: CONFIG.palette[1],
+    textures: {
+      diffuse: "/tex/stitch-04-diffuse.png",
+      normal: "/tex/stitch-04-normal.jpg",
+    },
+    params: {
+      scale: 0.03,
+      radius: 72,
     },
   },
 ];

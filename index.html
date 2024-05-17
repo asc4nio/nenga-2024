@@ -2,41 +2,382 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/sun.svg" />
+    <!-- <link rel="stylesheet" href="/style.css" /> -->
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Nenga</title>
+
+    <style>
+      @font-face {
+        font-family: "absans";
+        src: url("/fonts/Absans-Regular.woff2") format("woff2");
+      }
+
+      :root {
+        font-family: "absans";
+        /* font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; */
+        line-height: 1.25;
+        font-weight: 400;
+        font-size: calc(1rem + 0.25vw);
+
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        /* --col-white: #dfe8e8; */
+        --col-white: #ffffff;
+        --col-yellow: #e2db55;
+        --col-green: #0bcbab;
+        --col-cyan: #008a84;
+        --col-blue: #004699;
+        --col-black: #222222;
+
+        --tp-base-background-color: hsla(0, 0%, 10%, 0.8);
+        --tp-base-shadow-color: hsla(0, 0%, 0%, 0.2);
+        --tp-button-background-color: hsla(0, 0%, 80%, 1);
+        --tp-button-background-color-active: hsla(0, 0%, 100%, 1);
+        --tp-button-background-color-focus: hsla(0, 0%, 95%, 1);
+        --tp-button-background-color-hover: hsla(0, 0%, 85%, 1);
+        --tp-button-foreground-color: hsla(0, 0%, 0%, 0.8);
+        --tp-container-background-color: hsla(0, 0%, 0%, 0.3);
+        --tp-container-background-color-active: hsla(0, 0%, 0%, 0.6);
+        --tp-container-background-color-focus: hsla(0, 0%, 0%, 0.5);
+        --tp-container-background-color-hover: hsla(0, 0%, 0%, 0.4);
+        --tp-container-foreground-color: hsla(0, 0%, 100%, 0.5);
+        --tp-groove-foreground-color: hsla(0, 0%, 0%, 0.2);
+        --tp-input-background-color: hsla(0, 0%, 0%, 0.3);
+        --tp-input-background-color-active: hsla(0, 0%, 0%, 0.6);
+        --tp-input-background-color-focus: hsla(0, 0%, 0%, 0.5);
+        --tp-input-background-color-hover: hsla(0, 0%, 0%, 0.4);
+        --tp-input-foreground-color: hsla(0, 0%, 100%, 0.5);
+        --tp-label-foreground-color: hsla(0, 0%, 100%, 0.5);
+        --tp-monitor-background-color: hsla(0, 0%, 0%, 0.3);
+        --tp-monitor-foreground-color: hsla(0, 0%, 100%, 0.3);
+      }
+
+      * {
+        box-sizing: border-box;
+        /* box-sizing: content-box; */
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+
+        background-color: var(--col-white);
+        color: var(--col-black);
+      }
+
+      #app {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+
+      #loading-overlay {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background-color: white;
+      }
+
+      #threejs {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+
+      canvas {
+        touch-action: none;
+      }
+
+      dialog {
+        position: relative;
+        /* width: 100%; */
+        /* height: 100%; */
+        background: transparent;
+        border: none;
+
+        padding: 0;
+      }
+      dialog::backdrop {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+
+      #about-container {
+        width: 100%;
+        max-width: 420px;
+        margin-inline: auto;
+        margin-block: 2em;
+        text-align: center;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      dialog form {
+        position: fixed;
+        top: 0.5em;
+        right: 0.5em;
+        /* left: auto;
+        bottom: auto; */
+      }
+
+      #about-container p {
+        margin-block: 1em;
+      }
+
+      .link-icon {
+        color: var(--col-black);
+        display: block;
+        width: 2em;
+        height: 2em;
+      }
+
+      #ui {
+        pointer-events: none;
+
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        /* padding: 0.5em; */
+      }
+      #ui.hidden {
+        /* display: none; */
+        opacity: 0;
+      }
+
+      button {
+        pointer-events: auto;
+        cursor: pointer;
+
+        font-family: inherit;
+        font-size: 1.25em;
+
+        padding: 0;
+        margin: 0;
+
+        background: transparent;
+        border: none;
+      }
+
+      p {
+        font-size: 1.25em;
+      }
+
+      #tools {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        height: 100%;
+
+        /* margin-left: 0.5em; */
+
+        /* background-color: rgba(255, 255, 255, 0.2); */
+      }
+
+      .tool {
+        position: relative;
+        overflow: clip;
+        box-sizing: content-box;
+
+        width: 2rem;
+        height: 2rem;
+
+        padding: 0.4em;
+        margin-block: 0.2em;
+
+        left: -1.1em;
+
+        border-radius: 8em;
+
+        border: solid 0.02em white;
+        transition: all 0.2s ease-in-out;
+
+        /* box-shadow: 0px 0px 0px hsl(0deg 0% 0% / 0.2); */
+      }
+      .tool.active {
+        left: 0.5em;
+
+        /* background-color: var(--col-white); */
+        background-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0em 0.5em 0.5em hsl(0deg 0% 0% / 0.1);
+      }
+      .tool:hover:not(.active) {
+        left: 0em;
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      .tool-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      #actions {
+      }
+      .action {
+        position: relative;
+        width: 1.2em;
+        height: 1.2em;
+
+        margin: 0.5em;
+      }
+      .action:active {
+        color: var(--col-white);
+      }
+
+      #ui.prevent-click {
+        pointer-events: none;
+        user-select: none;
+      }
+
+      /* :root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.vanilla:hover {
+  filter: drop-shadow(0 0 2em #f7df1eaa);
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+} */
+    </style>
   </head>
   <body>
     <div id="app">
       <div id="threejs"></div>
-      <div id="ui">
+      <!-- <div id="ui" class="hidden"> -->
+      <div id="ui" class="">
         <div id="tools">
           <button class="tool active" id="tool-0">
-            <img class="tool-img" src="/ui/tool-0.png" alt="" />
+            <img class="tool-img" src="/ui/ui-tool-1.png" alt="" />
           </button>
           <button class="tool" id="tool-1">
-            <img class="tool-img" src="/ui/tool-1.png" alt="" />
+            <img class="tool-img" src="/ui/ui-tool-2.png" alt="" />
           </button>
           <button class="tool" id="tool-2">
-            <img class="tool-img" src="/ui/tool-2.png" alt="" />
+            <img class="tool-img" src="/ui/ui-tool-3.png" alt="" />
           </button>
           <button class="tool" id="tool-3">
-            <img class="tool-img" src="/tex/decal-01.png" alt="" />
+            <img class="tool-img" src="/ui/ui-decal-1.png" alt="" />
           </button>
           <button class="tool" id="tool-4">
-            <img class="tool-img" src="/tex/decal-02.png" alt="" />
+            <img class="tool-img" src="/ui/ui-decal-2.png" alt="" />
           </button>
           <button class="tool" id="tool-5">
-            <img class="tool-img" src="/tex/decal-04.png" alt="" />
+            <img class="tool-img" src="/ui/ui-decal-3.png" alt="" />
           </button>
         </div>
-        <nav>
-          <button id="tool-save">
+        <div id="actions">
+          <button class="action" id="tool-save">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
               viewBox="0 -960 960 960"
-              width="24px"
               fill="currentColor"
             >
               <path
@@ -44,12 +385,10 @@
               />
             </svg>
           </button>
-          <button id="tool-clear">
+          <button class="action" id="tool-clear">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="24px"
               viewBox="0 -960 960 960"
-              width="24px"
               fill="currentColor"
             >
               <path
@@ -57,7 +396,23 @@
               />
             </svg>
           </button>
-          <button id="about-trigger">
+          <button class="action" id="about-trigger">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 -960 960 960"
+              fill="currentColor"
+            >
+              <path
+                d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <dialog id="about" aria-labelledby="about-trigger">
+        <form method="dialog">
+          <button type="submit" autofocus>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="24px"
@@ -66,39 +421,34 @@
               fill="currentColor"
             >
               <path
-                d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"
+                d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
               />
             </svg>
           </button>
-        </nav>
-      </div>
-
-      <dialog id="about" aria-labelledby="about-trigger">
+        </form>
         <div id="about-container">
-          <form method="dialog">
-            <button type="submit" autofocus>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="24px"
-                viewBox="0 -960 960 960"
-                width="24px"
+          <img src="/nenga-logo.svg" alt="nenga logo" />
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo omnis
+            id mollitia numquam saepe similique perspiciatis consectetur nulla,
+            blanditiis corrupti tempora exercitationem, suscipit nihil!
+          </p>
+          <a class="link-icon" href="#">
+            <svg
+              viewBox="0 0 290 290"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M129.2.3H145c47.1 0 52.7.2 71.3 1a99 99 0 0 1 32.8 6.1c8.2 3.2 14.1 7 20.3 13.2 6.2 6.2 10 12.1 13.2 20.3a98.5 98.5 0 0 1 6.1 32.8c.8 18.6 1 24.2 1 71.3 0 47.1-.2 52.7-1 71.3a99 99 0 0 1-6.1 32.8c-3.2 8.2-7 14.1-13.2 20.3a54 54 0 0 1-20.3 13.2 98.5 98.5 0 0 1-32.8 6.1c-18.6.8-24.2 1-71.3 1-47.1 0-52.7-.2-71.3-1a99 99 0 0 1-32.8-6.1c-8.2-3.2-14.1-7-20.3-13.2a54.9 54.9 0 0 1-13.2-20.3 98.5 98.5 0 0 1-6.1-32.8c-.8-18.6-1-24.2-1-71.3 0-47.1.2-52.7 1-71.3a99 99 0 0 1 6.1-32.8c3.2-8.2 7-14.1 13.2-20.3 6.2-6.2 12.1-10 20.3-13.2a98.5 98.5 0 0 1 32.8-6.1 888 888 0 0 1 55.5-1Zm110 29.3a21.2 21.2 0 1 0 0 42.4 21.2 21.2 0 0 0 0-42.4ZM145 54.4a90.6 90.6 0 1 0 0 181.2 90.6 90.6 0 0 0 0-181.2Zm0 31.8a58.8 58.8 0 1 1 0 117.5 58.8 58.8 0 0 1 0-117.5Z"
                 fill="currentColor"
-              >
-                <path
-                  d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
-                />
-              </svg>
-            </button>
-            <img src="/nenga-logo.svg" alt="nenga logo" />
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo omnis
-              id mollitia numquam saepe similique perspiciatis consectetur
-              nulla, blanditiis corrupti tempora exercitationem, suscipit nihil!
-            </p>
-            <a href="#"> instagram </a>
-          </form>
+              />
+            </svg>
+          </a>
         </div>
       </dialog>
+
+      <div id="loading-overlay"></div>
     </div>
     <script type="module" src="/main.js"></script>
   </body>

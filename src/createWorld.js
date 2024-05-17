@@ -12,8 +12,9 @@ export default function createWorld(resources, scene, renderTarget) {
   // SET LIGHTS
   function createLights() {
     // ambient
-    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+    // scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
+    /*
     // directional
     const directionalLightIntensity = 5;
     const directionalLight = new THREE.DirectionalLight(
@@ -23,6 +24,27 @@ export default function createWorld(resources, scene, renderTarget) {
     directionalLight.position.set(-1, 0.5, 1);
     // directionalLight.position.set(0, 0, 1);
     // directionalLight.lookAt(new THREE.Vector3(0, 0, 0));
+    scene.add(directionalLight);
+*/
+
+    // target
+    // const targetObject = new THREE.Object3D();
+    // targetObject.position.set(0, 0, 0);
+    // scene.add(targetObject);
+
+    // directional
+    const directionalLightIntensity = CONFIG.lightIntensity;
+    const directionalLight = new THREE.DirectionalLight(
+      0xffffff,
+      directionalLightIntensity
+    );
+    directionalLight.position.set(
+      CONFIG.lightPosition[0],
+      CONFIG.lightPosition[1],
+      CONFIG.lightPosition[2]
+    );
+    // directionalLight.lookAt(new THREE.Vector3(0, 0, 0));
+
     scene.add(directionalLight);
 
     // pointLight
@@ -54,8 +76,8 @@ export default function createWorld(resources, scene, renderTarget) {
       map: resources.denim.diffuse,
       normalMap: resources.denim.normal,
       normalScale: new THREE.Vector2(2, 2),
-      // bumpMap: resources.denim.bump,
       // roughnessMap: resources.denim.roughness,
+      // bumpMap: resources.denim.bump,
       // transparent: true,
       // depthTest: true,
       // depthWrite: false,
@@ -74,10 +96,11 @@ export default function createWorld(resources, scene, renderTarget) {
         transparent: true,
         // normalScale: new THREE.Vector2(-1, -1),
         // metalness: 0,
-        // roughness: 0,
+        roughness: 0.5,
         // depthTest: true,
         // depthWrite: false,
       });
+      // material.needsUpdate = true;
       stitchesMaterials.push(material);
     }
 

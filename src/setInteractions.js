@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { CONFIG, TOOLS } from "/src/config.js";
 import { DecalGeometry } from "three/addons/geometries/DecalGeometry.js";
 
-export default function setInteractions(
+export default async function setInteractions(
   target,
   scene,
   renderTarget,
@@ -29,7 +29,7 @@ export default function setInteractions(
   // const mouse = new THREE.Vector2();
 
   addListeners(renderTarget);
-  sewAnimation(world.sun.points);
+  // sewAnimation(world.sun.points);
 
   // RAYCASTER
   function checkRaycasterIntersection(mesh, event) {
@@ -58,6 +58,7 @@ export default function setInteractions(
     const scale = TOOLS[nengaState.currentTool].params.scale;
     const size = new THREE.Vector3(scale, scale, 1);
     const material = world.materials.stitchesMaterials[toolIndex].clone();
+
     material.color = new THREE.Color(TOOLS[nengaState.currentTool].color);
 
     const mesh = new THREE.Mesh(
@@ -154,18 +155,35 @@ export default function setInteractions(
       position.y = points[i].position.y;
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      await sleep(40);
+      await sleep(CONFIG.sunStepEvery);
 
       // sew
-      let mesh = createStitch(target, orientation, position, 2);
+      // let mesh = createStitch(target, orientation, position, 3);
+
+      const scale = TOOLS[6].params.scale;
+      const size = new THREE.Vector3(scale, scale, 1);
+      const material = world.materials.stitchesMaterials[3].clone();
+
+      material.color = new THREE.Color(TOOLS[6].color);
+
+      const mesh = new THREE.Mesh(
+        new DecalGeometry(target, position, orientation, size),
+        material
+      );
+
       mesh.position.z += 0.002;
       animatedStitches.add(mesh);
     }
+    nengaState.preventInteractions = false;
   }
 
   // EVENT LISTENERS
   function addListeners(renderTarget) {
     renderTarget.addEventListener("pointerdown", function (event) {
+      if (nengaState.preventInteractions) return;
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+
+      console.warn(event);
       // console.debug("pointerdown");
       pointerState.isPointerDown = true;
 
@@ -180,6 +198,9 @@ export default function setInteractions(
     });
 
     renderTarget.addEventListener("pointermove", (event) => {
+      if (nengaState.preventInteractions) return;
+      // if (event.pointerType === "mouse" && event.button !== 0) return;
+
       // console.debug("pointermove");
 
       // proceed if pointer has clicked
@@ -197,11 +218,15 @@ export default function setInteractions(
           pointerState.dragStartPos.y = event.pageY;
 
           ui.hide();
+          // ui.hideTools();
         }
       }
     });
 
     renderTarget.addEventListener("pointerup", function (event) {
+      if (nengaState.preventInteractions) return;
+      // if (event.pointerType === "mouse" && event.button !== 0) return;
+
       // console.debug("pointerup");
       pointerState.isPointerDown = false;
 
@@ -210,6 +235,7 @@ export default function setInteractions(
         pointerState.isShooting = false;
 
         ui.show();
+        // ui.showTools();
       }
     });
   }
@@ -217,5 +243,6 @@ export default function setInteractions(
   return {
     stitches,
     decals,
+    sewAnimation,
   };
 }

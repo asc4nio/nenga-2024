@@ -67,8 +67,8 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 999999999;
-  background-color: red;
+  z-index: 9999;
+  background-color: white;
 }
 
 #threejs {
@@ -165,10 +165,11 @@ p {
   padding: 0.25em;
   margin-block: 0.12em;
 
-  background-color: rgba(255, 255, 255, 0.2);
+  /* background-color: rgba(255, 255, 255, 0.2); */
   /* border-radius: 50%; */
   border-radius: 8em;
   overflow: clip;
+  /* transform: scale(1); */
 
   transition: all 0.2s;
 
@@ -176,6 +177,9 @@ p {
 }
 .tool.active {
   background-color: white;
+
+  /* transform: scale(1.2); */
+
   /* background-color: #fdfcbb; */
   /* padding: 0.25em; */
 

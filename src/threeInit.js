@@ -11,12 +11,16 @@ import createWorld from "/src/createWorld.js";
 import setInteractions from "/src/setInteractions.js";
 
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
+import { gsap } from "gsap";
 
 export default async function threeInit(renderTarget) {
   // CREATE STATE INSTANCE
   window.nengaState = {
+    state: "loading", //loaded, running
+    dynamicLights: true,
     debug: window.location.hash.includes("#debug"),
     orbitControls: false,
+    preventInteractions: true,
     currentTool: 0,
     currentColor: 0,
   };
@@ -42,13 +46,35 @@ export default async function threeInit(renderTarget) {
   scene.add(denimPlane);
 
   // THAN SET THE INTERACTIONS
-  const interactivity = setInteractions(
+  const interactivity = await setInteractions(
     denimPlane,
     scene,
     renderTarget,
     camera,
     world
   );
+
+  async function openAnimation() {
+    nengaState.state = "running";
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    // await sleep(300);
+    document.getElementById("loading-overlay").style.display = "none";
+
+    gsap.fromTo(
+      CONFIG,
+      {
+        lightIntensity: 10,
+      },
+      {
+        lightIntensity: 4,
+        duration: 1.6,
+      }
+    );
+
+    await interactivity.sewAnimation(world.sun.points);
+    nengaState.dynamicLights = false;
+    ui.show();
+  }
 
   // IF DEBUG
   if (nengaState.debug) {
@@ -75,6 +101,11 @@ export default async function threeInit(renderTarget) {
 
     manager.onLoad = function () {
       console.log("Loading complete!");
+
+      nengaState.state = "loaded";
+
+      // console.log(interactivity);
+      // openAnimation();
     };
 
     manager.onProgress = function (url, itemsLoaded, itemsTotal) {
@@ -102,11 +133,12 @@ export default async function threeInit(renderTarget) {
     let renderer = new THREE.WebGLRenderer({
       // antialias: true,
       preserveDrawingBuffer: true,
-      alpha: true,
+      // alpha: true,
     });
     renderer.setSize(renderTarget.offsetWidth, renderTarget.offsetHeight);
-    // renderer.setClearColor(new THREE.Color(0xffffff));
-    renderer.setClearColor(0x000000, 0); // the default
+    // renderer.setClearColor(0x000000, 0); // the default for alpha canvas
+    renderer.setClearColor(new THREE.Color(0xffffff));
+    renderer.setPixelRatio(window.devicePixelRatio);
 
     renderTarget.appendChild(renderer.domElement);
 
@@ -130,6 +162,8 @@ export default async function threeInit(renderTarget) {
     if (nengaState.orbitControls) {
       let controls = new OrbitControls(camera, renderTarget);
       controls.enableRotate = false;
+      controls.minDistance = 2;
+      controls.maxDistance = 5;
     }
 
     return camera;
@@ -187,24 +221,60 @@ export default async function threeInit(renderTarget) {
     // paneCurrentTool.on("change", function (ev) {
     //   console.log(`change: ${ev.value}`);
     // });
+
+    pane.addBinding(CONFIG, "lightIntensity", {
+      min: 0,
+      max: 10,
+    });
+    pane.addBinding(CONFIG.lightPosition, "0", {
+      min: -5,
+      max: 5,
+    });
+    pane.addBinding(CONFIG.lightPosition, "1", {
+      min: -5,
+      max: 5,
+    });
+    pane.addBinding(CONFIG.lightPosition, "2", {
+      min: -5,
+      max: 5,
+    });
   }
 
   function update() {
     renderer.render(scene, camera);
-    if (window.pointerState) {
-      // world.lights.directionalLight.position.set(
-      //   pointerState.mouse.x,
-      //   pointerState.mouse.y,
-      //   world.lights.directionalLight.position.z
-      // );
-      // world.lights.pointLight.lookAt(new THREE.Vector3(0, 0, 0));
-      // world.lights.pointLight.position.set(
-      //   pointerState.mouse.x,
-      //   pointerState.mouse.y,
-      //   world.lights.pointLight.position.z
-      // );
+    if (nengaState.dynamicLights) {
+      world.lights.directionalLight.intensity = CONFIG.lightIntensity;
     }
-    if (nengaState.debug) stats.update();
+
+    if (nengaState.state === "loaded") {
+      openAnimation();
+    }
+
+    // if (window.pointerState) {
+    //   // world.lights.directionalLight.position.set(
+    //   //   pointerState.mouse.x,
+    //   //   pointerState.mouse.y,
+    //   //   world.lights.directionalLight.position.z
+    //   // );
+    //   // world.lights.pointLight.lookAt(new THREE.Vector3(0, 0, 0));
+    //   // world.lights.pointLight.position.set(
+    //   //   pointerState.mouse.x,
+    //   //   pointerState.mouse.y,
+    //   //   world.lights.pointLight.position.z
+    //   // );
+    // }
+    if (nengaState.debug) {
+      world.lights.directionalLight.position.set(
+        CONFIG.lightPosition[0],
+        CONFIG.lightPosition[1],
+        CONFIG.lightPosition[2]
+      );
+      world.lights.directionalLight.intensity = CONFIG.lightIntensity;
+      world.lights.directionalLight.target.position.set(0, 0, 0);
+      // world.lights.directionalLight.lookAt(new THREE.Vector3(0, 0, 0));
+
+      stats.update();
+    }
   }
   function start() {
     renderer.setAnimationLoop(update);
@@ -220,9 +290,20 @@ export default async function threeInit(renderTarget) {
     renderer.setSize(renderTarget.offsetWidth, renderTarget.offsetHeight);
     renderer.render(scene, camera);
 
-    // scene.remove(denimPlane);
-    // denimPlane = world.createDenimPlane();
-    // scene.add(denimPlane);
+    scene.remove(denimPlane);
+    denimPlane = world.createDenimPlane();
+    scene.add(denimPlane);
+    world.materials.denimMaterial.map.repeat.set(
+      CONFIG.denimScale *
+        (renderTarget.offsetWidth / renderTarget.offsetHeight),
+      CONFIG.denimScale
+    );
+    world.materials.denimMaterial.normalMap.repeat.set(
+      CONFIG.denimScale *
+        (renderTarget.offsetWidth / renderTarget.offsetHeight),
+      CONFIG.denimScale
+    );
+    console.debug(world.materials.denimMaterial);
   }
   function saveAsImage() {
     let link = document.createElement("a");
@@ -258,5 +339,6 @@ export default async function threeInit(renderTarget) {
     saveAsImage,
     onResize,
     clear,
+    // openAnimation,
   };
 }
