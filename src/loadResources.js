@@ -1,12 +1,24 @@
 import { TOOLS } from "./config.js";
 
-export default async function loadResources(textureLoader, svgLoader) {
+import denimDiffuse from "/tex/denim02-diffuse.jpg";
+import denimNormal from "/tex/denim02-normal.jpg";
+// import denimRoughness from "/tex/denim02-roughness.jpg";
+
+import sunSvg from "/tex/sun.svg";
+
+import stitchSoundFx from "/stitchSound.wav";
+
+export default async function loadResources(
+  textureLoader,
+  svgLoader,
+  audioLoader
+) {
   // DENIM TEXTURES
   let denim = {
-    diffuse: await textureLoader.loadAsync("/tex/denim02-diffuse.jpg"),
-    normal: await textureLoader.loadAsync("/tex/denim02-normal.jpg"),
-    roughness: await textureLoader.loadAsync("/tex/denim02-roughness.jpg"),
-    bump: await textureLoader.loadAsync("/tex/denim02-bump.jpg"),
+    diffuse: await textureLoader.loadAsync(denimDiffuse),
+    normal: await textureLoader.loadAsync(denimNormal),
+    // roughness: await textureLoader.loadAsync("/tex/denim02-roughness.jpg"),
+    // bump: await textureLoader.loadAsync("/tex/denim02-bump.jpg"),
   };
 
   // STITCHES TEXTURES
@@ -29,12 +41,15 @@ export default async function loadResources(textureLoader, svgLoader) {
   }
 
   // SVG
-  let sun = await svgLoader.loadAsync("/tex/sun.svg");
+  let sun = await svgLoader.loadAsync(sunSvg);
+
+  let stitchSound = await audioLoader.loadAsync(stitchSoundFx);
 
   return {
     denim,
     stitches,
     decals,
     sun,
+    stitchSound,
   };
 }

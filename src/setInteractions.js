@@ -7,7 +7,8 @@ export default async function setInteractions(
   scene,
   renderTarget,
   camera,
-  world
+  world,
+  audio
 ) {
   window.pointerState = {
     isPointerDown: false,
@@ -93,6 +94,9 @@ export default async function setInteractions(
     mesh.position.z += 0.002;
     stitches.push(mesh);
     scene.add(mesh);
+
+    audio.sound.stop();
+    audio.sound.play();
 
     // store last stitch position
     window.pointerState.lastDecalPos = position;

@@ -1,3 +1,15 @@
+import stitch01diffuse from "/tex/stitch-01-diffuse.png";
+import stitch01normal from "/tex/stitch-01-normal.jpg";
+import stitch02diffuse from "/tex/stitch-02-diffuse.png";
+import stitch02normal from "/tex/stitch-02-normal.jpg";
+import stitch03diffuse from "/tex/stitch-03-diffuse.png";
+import stitch03normal from "/tex/stitch-03-normal.jpg";
+import stitch04diffuse from "/tex/stitch-04-diffuse.png";
+import stitch04normal from "/tex/stitch-04-normal.jpg";
+import decal01 from "/tex/decal-01-s.png";
+import decal02 from "/tex/decal-02-s.png";
+import decal03 from "/tex/decal-04-s.png";
+
 export const CONFIG = {
   cameraDistance: 0,
   denimScale: 2.5,
@@ -14,8 +26,8 @@ export const TOOLS = [
     type: "sewing",
     color: CONFIG.palette[0],
     textures: {
-      diffuse: "/tex/stitch-01-diffuse.png",
-      normal: "/tex/stitch-01-normal.jpg",
+      diffuse: stitch01diffuse,
+      normal: stitch01normal,
     },
     params: {
       scale: 0.03,
@@ -26,8 +38,8 @@ export const TOOLS = [
     type: "sewing",
     color: CONFIG.palette[1],
     textures: {
-      diffuse: "/tex/stitch-02-diffuse.png",
-      normal: "/tex/stitch-02-normal.jpg",
+      diffuse: stitch02diffuse,
+      normal: stitch02normal,
     },
     params: {
       scale: 0.04,
@@ -38,8 +50,8 @@ export const TOOLS = [
     type: "sewing",
     color: CONFIG.palette[3],
     textures: {
-      diffuse: "/tex/stitch-03-diffuse.png",
-      normal: "/tex/stitch-03-normal.jpg",
+      diffuse: stitch03diffuse,
+      normal: stitch03normal,
     },
     params: {
       scale: 0.03,
@@ -49,7 +61,7 @@ export const TOOLS = [
   {
     type: "decal",
     textures: {
-      diffuse: "/tex/decal-01-s.png",
+      diffuse: decal01,
     },
     params: {
       scale: 0.07 * 0.8,
@@ -58,7 +70,7 @@ export const TOOLS = [
   {
     type: "decal",
     textures: {
-      diffuse: "/tex/decal-02-s.png",
+      diffuse: decal02,
     },
     params: {
       scale: 0.07 * 0.8,
@@ -67,7 +79,7 @@ export const TOOLS = [
   {
     type: "decal",
     textures: {
-      diffuse: "/tex/decal-04-s.png",
+      diffuse: decal03,
     },
     params: {
       scale: 0.06 * 1.2,
@@ -77,8 +89,8 @@ export const TOOLS = [
     type: "sewing",
     color: CONFIG.palette[1],
     textures: {
-      diffuse: "/tex/stitch-04-diffuse.png",
-      normal: "/tex/stitch-04-normal.jpg",
+      diffuse: stitch04diffuse,
+      normal: stitch04normal,
     },
     params: {
       scale: 0.03,

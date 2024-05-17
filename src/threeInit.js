@@ -34,13 +34,17 @@ export default async function threeInit(renderTarget) {
   const loaders = createLoaders();
   const resources = await loadResources(
     loaders.textureLoader,
-    loaders.svgLoader
+    loaders.svgLoader,
+    loaders.audioLoader
   ).catch((err) => {
     console.log(err);
   });
 
   // THAN CREATE THE WORLD
   const world = createWorld(resources, scene, renderTarget);
+  const audio = createAudio();
+  audio.sound.setBuffer(resources.stitchSound);
+  audio.sound.setVolume(0.05);
 
   let denimPlane = world.createDenimPlane();
   scene.add(denimPlane);
@@ -51,7 +55,8 @@ export default async function threeInit(renderTarget) {
     scene,
     renderTarget,
     camera,
-    world
+    world,
+    audio
   );
 
   async function openAnimation() {
@@ -67,13 +72,16 @@ export default async function threeInit(renderTarget) {
       },
       {
         lightIntensity: 4,
-        duration: 1.6,
+        duration: 3.2,
+        ease: "power2.out",
       }
     );
 
     await interactivity.sewAnimation(world.sun.points);
     nengaState.dynamicLights = false;
     ui.show();
+
+    // audio.sound.play();
   }
 
   // IF DEBUG
@@ -125,8 +133,9 @@ export default async function threeInit(renderTarget) {
     };
     const textureLoader = new THREE.TextureLoader(manager);
     const svgLoader = new SVGLoader(manager);
+    const audioLoader = new THREE.AudioLoader(manager);
 
-    return { textureLoader, svgLoader };
+    return { textureLoader, svgLoader, audioLoader };
   }
   // CREATE RENDERER
   function createRenderer() {
@@ -138,7 +147,8 @@ export default async function threeInit(renderTarget) {
     renderer.setSize(renderTarget.offsetWidth, renderTarget.offsetHeight);
     // renderer.setClearColor(0x000000, 0); // the default for alpha canvas
     renderer.setClearColor(new THREE.Color(0xffffff));
-    renderer.setPixelRatio(window.devicePixelRatio);
+
+    renderer.setPixelRatio(window.devicePixelRatio > 2 ? 2 : 1);
 
     renderTarget.appendChild(renderer.domElement);
 
@@ -167,6 +177,17 @@ export default async function threeInit(renderTarget) {
     }
 
     return camera;
+  }
+  // CREATE AUDIO
+  function createAudio() {
+    // create an AudioListener and add it to the camera
+    const listener = new THREE.AudioListener();
+    camera.add(listener);
+
+    // create a global audio source
+    const sound = new THREE.Audio(listener);
+
+    return { listener, sound };
   }
   // SET DEBUG ENVIRONMENT
   function debug() {
